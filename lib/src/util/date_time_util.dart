@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeUtil {
@@ -22,5 +23,11 @@ extension DateTimeExt on DateTime {
 
   DateTime get date {
     return DateTime(year, month, day);
+  }
+}
+
+extension TimeOfDayExt on TimeOfDay {
+  int get getMinutes {
+    return hour * 60 + minute;
   }
 }
