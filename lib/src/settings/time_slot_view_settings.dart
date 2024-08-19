@@ -1,44 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:g_calendar/src/util/date_time_util.dart';
 
 class TimeSlotViewSettings {
   final Duration timeInterval;
   final double timeIntervalHeight;
-  // final double timeIntervalWidth;
   final TimeOfDay startTime;
   final TimeOfDay endTime;
 
-  final String timeFormat;
+  final BorderSide cellBorderSide;
 
-  // final List<int> nonWorkingDays;
+  final bool showEndTime;
 
-  // /// number of days displayed on the calendar (Not effective with [CalendarViewMode.day] view mode)
-  // final int numberOfDaysInView;
+  final bool showStartTime;
 
+  /// show time zone (GMT+00) instead of start time (12:00 am), default true
+  final bool showTimeZone;
+
+  ///
   final double timeRulerSize;
 
+  /// time display format, default HH:mm
+  final String timeFormat;
+  final TextStyle timeTextStyle;
+
+  final int horizontalLinesCount;
+
   TimeSlotViewSettings({
-    this.timeInterval = const Duration(minutes: 30),
+    this.timeInterval = const Duration(minutes: 60),
     this.timeIntervalHeight = 60,
-    // this.timeIntervalWidth = 100,
     this.startTime = const TimeOfDay(hour: 8, minute: 0),
     this.endTime = const TimeOfDay(hour: 20, minute: 0),
+    this.cellBorderSide = const BorderSide(width: 0.2, color: Colors.black54),
+    this.showEndTime = false,
+    this.showStartTime = false,
+    this.showTimeZone = true,
+    this.timeRulerSize = 80,
     this.timeFormat = 'HH:mm',
-    // this.nonWorkingDays = const [],
-    // this.numberOfDaysInView = 7,
-
-    this.timeRulerSize = 76,
+    this.timeTextStyle = const TextStyle(
+      color: Colors.grey,
+      fontSize: 12,
+    ),
+    this.horizontalLinesCount = 6,
   }) {
-    assert(timeIntervalHeight >= 0);
-
-    // assert(numberOfDaysInView > 0 && numberOfDaysInView < 7);
-    assert(timeRulerSize >= 0);
-
-    assert(endTime.getMinutes >= startTime.getMinutes);
+    assert(timeInterval.inMinutes > 0, 'Minimum timeInterval is 1 minute');
+    // assert(timeRulerSize >= 0);
   }
 
   int get totalMinutes => 24 * 60;
 
+  /// caculate actual time interval base on [timeInterval]
   int get timeIntervalInMinutes {
     final timeIntervalMinutes = timeInterval.inMinutes;
     if (timeIntervalMinutes >= 0 && timeIntervalMinutes <= totalMinutes) {
@@ -59,5 +68,39 @@ class TimeSlotViewSettings {
 
   int get timeLineCount {
     return totalMinutes ~/ timeIntervalInMinutes;
+  }
+
+  double get _totalTimeHeight => timeIntervalHeight * timeLineCount;
+
+  double get totalTimeRulerHeight {
+    if (timeIntervalHeight < 0) return 0;
+    final halfTextHeight = textSize.height / 2;
+    var diff = (showEndTime ? halfTextHeight - minuteHeight : 0.0) +
+        (showStartTime ? halfTextHeight : 0.0);
+
+    return _totalTimeHeight + diff;
+  }
+
+  double get minuteHeight {
+    return timeIntervalHeight / timeIntervalInMinutes;
+  }
+
+  Size get textSize {
+    final TextPainter textPainter = TextPainter(
+        text: TextSpan(text: '', style: timeTextStyle),
+        maxLines: 1,
+        textDirection: TextDirection.ltr)
+      ..layout(
+        minWidth: 0,
+        maxWidth: double.maxFinite,
+      );
+    return textPainter.size;
+  }
+
+  /// y-axis offset of time
+  double getYPositionTime({required Duration durationTime}) {
+    final minutes = durationTime.inMinutes;
+
+    return minutes / totalMinutes * _totalTimeHeight;
   }
 }

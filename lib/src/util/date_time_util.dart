@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DateTimeUtil {
-  String formatDateTimeToString({required DateTime datetime, String? pattern, String? locale}) {
+  static String formatDateTimeToString(
+      {required DateTime datetime, String? pattern, String? locale}) {
     return DateFormat(pattern ?? DateTimePattern.datePattern, locale).format(datetime);
   }
 }
@@ -10,6 +11,9 @@ class DateTimeUtil {
 class DateTimePattern {
   /// yyyy-MM-dd
   static String datePattern = 'yyyy-MM-dd';
+
+  /// EE
+  static String dayPattern = 'EE';
 }
 
 extension DateTimeExt on DateTime {
